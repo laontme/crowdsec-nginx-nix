@@ -1,12 +1,16 @@
 #!/bin/sh
 set -eu
 cscli="cscli -c /etc/crowdsec/config.yaml"
+# LAPI can retain a bouncer after rollbacks wipe the key file; delete and re-add.
 if $cscli bouncers list -o json | jq -e --arg n "@bouncerName@" 'any(.[]; .name == $n)' >/dev/null; then
   if [ ! -s @apiKeyFile@ ]; then
-    echo "nginx bouncer registered but @apiKeyFile@ is missing" >&2
-    exit 1
+    echo "nginx bouncer registered but key missing; re-registering" >&2
+    $cscli bouncers delete -- "@bouncerName@"
+    rm -f @apiKeyFile@
+    $cscli bouncers add --output raw -- "@bouncerName@" > @apiKeyFile@
   fi
 else
+  rm -f @apiKeyFile@
   $cscli bouncers add --output raw -- "@bouncerName@" > @apiKeyFile@
 fi
 
