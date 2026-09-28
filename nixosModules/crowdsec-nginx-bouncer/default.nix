@@ -129,7 +129,7 @@ in
         Group = "crowdsec";
         SupplementaryGroups = [ "nginx" ];
         StateDirectory = "crowdsec";
-        RemainAfterSuccess = true;
+        RemainAfterExit = true;
         ExecStart = "${pkgs.runtimeShell} ${registerScript}";
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl try-reload-or-restart nginx.service";
       };
