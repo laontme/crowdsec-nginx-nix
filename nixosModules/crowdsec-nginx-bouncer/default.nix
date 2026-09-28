@@ -18,23 +18,15 @@ let
     types
     ;
 
-  lua = pkgs.lua51Packages;
   luaCs = cfg.package;
 
-  luaPath = lib.concatStringsSep ";" [
-    "${luaCs}/lua/?.lua"
-    "${luaCs}/lua/?/init.lua"
-    "${lua.lua-resty-http}/share/lua/5.1/?.lua"
-    "${lua.lua-resty-lrucache}/share/lua/5.1/?.lua"
-    "${lua.lua-cjson}/share/lua/5.1/?.lua"
-  ];
-  luaCPath = "${lua.lua-cjson}/lib/lua/5.1/?.so";
-
-  initLua = pkgs.replaceVars ./lua/init.lua { bouncerConf = cfg.configPath; };
+  initLua = pkgs.replaceVars ./lua/init.lua {
+    bouncerConf = cfg.configPath;
+    luaCsRoot = "${luaCs}/lua";
+  };
 
   nginxHttp = pkgs.replaceVars ./nginx-http.conf {
     crowdsecLog = cfg.accessLogPath;
-    inherit luaPath luaCPath;
     initLua = "${initLua}";
     workerLua = "${./lua/worker.lua}";
     accessLua = "${./lua/access.lua}";
@@ -144,8 +136,14 @@ in
       ];
     };
 
+    # NixOS wires resty.core automatically; we only add CrowdSec's Lua deps.
     services.nginx = {
-      additionalModules = [ pkgs.nginxModules.lua ];
+      lua.enable = true;
+      lua.extraPackages = ps: [
+        ps.lua-resty-http
+        ps.lua-resty-lrucache
+        ps.lua-cjson
+      ];
       appendHttpConfig = lib.mkAfter ''
         include ${nginxHttp};
       '';

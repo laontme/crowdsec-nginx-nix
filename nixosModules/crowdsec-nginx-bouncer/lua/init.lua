@@ -1,3 +1,9 @@
+-- Prepend CrowdSec Lua lib without overriding nginx's resty.core path.
+do
+  local root = "@luaCsRoot@"
+  package.path = root .. "/?.lua;" .. root .. "/?/init.lua;" .. package.path
+end
+
 -- Fail-open until crowdsec-nginx-bouncer-register writes the conf.
 local conf = "@bouncerConf@"
 local f = io.open(conf, "r")
