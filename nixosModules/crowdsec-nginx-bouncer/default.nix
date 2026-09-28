@@ -116,6 +116,7 @@ in
       "f ${cfg.accessLogPath} 0640 nginx nginx -"
     ];
 
+    # Share a real /var/lib/crowdsec with the engine (no DynamicUser private/ symlink).
     systemd.services.crowdsec-nginx-bouncer-register = mkIf cfg.registerBouncer.enable {
       description = "Register nginx Lua bouncer with CrowdSec LAPI";
       wantedBy = [ "multi-user.target" ];
@@ -125,6 +126,7 @@ in
         Type = "oneshot";
         User = "crowdsec";
         Group = "crowdsec";
+        StateDirectory = "crowdsec";
         RemainAfterSuccess = true;
         ExecStart = "${pkgs.runtimeShell} ${registerScript}";
         ExecStartPost = "+${pkgs.systemd}/bin/systemctl try-reload-or-restart nginx.service";
