@@ -44,7 +44,6 @@ let
     apiUrl = cfg.apiUrl;
     appsecUrl = if cfg.appsecUrl != null then cfg.appsecUrl else "";
     banTemplate = "${luaCs}/templates/ban.html";
-    appsecEnabled = if cfg.appsecUrl != null then "true" else "false";
   };
 
   registerScript = pkgs.replaceVars ./register-bouncer.sh {
