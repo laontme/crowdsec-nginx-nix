@@ -109,7 +109,8 @@ in
       }
     ];
 
-    users.users.crowdsec.extraGroups = lib.mkIf (options.users.users ? crowdsec) [ "nginx" ];
+    # options.users.users ? crowdsec is always false (dynamic attr); set unconditionally.
+    users.users.crowdsec.extraGroups = [ "nginx" ];
 
     systemd.tmpfiles.rules = [
       "d /var/lib/crowdsec 0750 crowdsec crowdsec -"
@@ -126,6 +127,7 @@ in
         Type = "oneshot";
         User = "crowdsec";
         Group = "crowdsec";
+        SupplementaryGroups = [ "nginx" ];
         StateDirectory = "crowdsec";
         RemainAfterSuccess = true;
         ExecStart = "${pkgs.runtimeShell} ${registerScript}";
